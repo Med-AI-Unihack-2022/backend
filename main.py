@@ -1,12 +1,14 @@
 from typing import Optional
 
 from fastapi import FastAPI
+from db import mydb
 
 app = FastAPI()
 
 
 @app.get("/")
 def read_root():
+    print(mydb)
     return {"Hello": "World"}
 
 
