@@ -19,3 +19,19 @@ pip install -r requirments.txt
 ```
 uvicorn main:app --reload
 ```
+
+# Design
+
+## Peer to peer authentication (via QRcode)
+1. A QRcode shows in the doctor's view 
+
+  * The web page passes the ID of the doctor and the patient, the backend returns a QRcode and docto-token
+  * The server save the QRcode information and ID information to DB
+  * The web page checks the approval status every 10 seconds
+
+2. The patient scans the QRcode and paitent's ID
+  * The app sends the QRcode information to backend
+  * The backend uses the QRcode and patient's ID to look up the relevant information in the DB
+  * If there is a record, the backend returns a patient-token and prompt message to the app
+  * The patient approves the request and the app sends a request with patient-id and patient-token to the backend 
+  * The backend changes the approval status to true
