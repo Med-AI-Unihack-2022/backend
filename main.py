@@ -101,7 +101,6 @@ def qr_codes_verify(patient_token: str, qr_code_token: str):
 # Get a QR code that will show on the doctor's screen
 @app.get("/qr_codes/:qr_code_token")
 def qr_codes_create(qr_code_token: str):
-    import pdb;pdb.set_trace()
     qr_code_doc =  find_qr_code_by_qr_code_token(qr_code_token)
     doctor_id = qr_code_doc['doctor_id']
     qr_code_content = make_qr_code(doctor_id, qr_code_token)
