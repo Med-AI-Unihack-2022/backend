@@ -5,7 +5,7 @@ import qrcode
 from typing import Optional
 
 from fastapi import FastAPI
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
 
 from db import mydb, init_db
 
@@ -31,16 +31,36 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
-    return {"item_id": item_id, "q": q}
+@app.post("/doctors/signin")
+def signin(username: str, password: str, response: Response):
+    doc_filter = {'username': username, 'password': password}
+    auth_token = str(uuid.uuid1())
+    doctor = mydb.doctors.find_one_and_update(doc_filter, {'$set': {'authentication_token': auth_token}})
+    if not doctor:
+        response.status_code = 401
+        return {}
+    return {
+        'authentication_token': auth_token
+    }
+
+@app.post("/patients/signin")
+def signin(username: str, password: str, response: Response):
+    doc_filter = {'username': username, 'password': password}
+    auth_token = str(uuid.uuid1())
+    patient = mydb.patients.find_one_and_update(doc_filter, {'$set': {'authentication_token': auth_token}})
+    if not patient:
+        response.status_code = 401
+        return {}
+    return {
+        'authentication_token': auth_token
+    }
 
 
 def find_doctor(doctor_token: str):
-    return mydb.doctors.find_one({'authenticaion_token': doctor_token})
+    return mydb.doctors.find_one({'authentication_token': doctor_token})
 
 def find_patient(patient_token: str):
-    return mydb.patients.find_one({'authenticaion_token': patient_token})
+    return mydb.patients.find_one({'authentication_token': patient_token})
 
 def create_qr_code_doc(qr_code_doc):
     return mydb.qr_codes.insert_one(qr_code_doc)
@@ -53,7 +73,7 @@ def find_qr_code_by_qr_code_token(qr_code_token):
 
 
 @app.get('/qr_codes/query')
-def qr_codes_approve(doctor_token: str, qr_code_token: str):
+def qr_codes_query(doctor_token: str, qr_code_token: str):
     # TODO Verify doctor token
     doctor = find_doctor(doctor_token)
     qr_code_doc =  find_qr_code_by_qr_code_token(qr_code_token)

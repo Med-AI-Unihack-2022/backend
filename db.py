@@ -17,6 +17,7 @@ def init_db():
 
     patient = {
       'id': patient_id,
+      'username': 'tony',
       'first_name': 'Tony',
       'last_name': 'Stark',
       'age': 58,
@@ -26,6 +27,7 @@ def init_db():
 
     doctor = {
       'id': doctor_id,
+      'username': 'nick',
       'first_name': 'Nick',
       'last_name': 'Furry',
       'age': 68,

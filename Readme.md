@@ -46,7 +46,7 @@ GET http://127.0.0.1:8000/qr_codes/:qr_code_token?qr_code_token=2e6d6da4-96b4-11
 
 Response:
 
-A QR code image 
+A QR code image
 
 ## Check approval status (web)
 Request:
@@ -67,7 +67,7 @@ Response:
 ```
 
 ## Verify the QR code ( used by the mobile app)
-Request: 
+Request:
 
 `patient_token` returns by backend when the patient logs in
 
@@ -125,6 +125,7 @@ Doctor document
 ```JSON
 {
   'id': 'xxx',
+  'username': 'xxx',
   'first_name': 'xxx',
   'last_name': 'xxx',
   'age': 88,
@@ -136,6 +137,7 @@ Patient document
 ```JSON
 {
   'id': 'xxx',
+  'username': 'xxx',
   'first_name': 'xxx',
   'last_name': 'xxx',
   'age': 88,
