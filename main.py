@@ -51,14 +51,33 @@ def update_qr_code_doc(qr_code_doc):
 def find_qr_code_by_qr_code_token(qr_code_token):
     return mydb.qr_codes.find_one({'qr_code_token': qr_code_token})
 
+
+@app.get('/qr_codes/query')
+def qr_codes_approve(doctor_token: str, qr_code_token: str):
+    # TODO Verify doctor token
+    doctor = find_doctor(doctor_token)
+    qr_code_doc =  find_qr_code_by_qr_code_token(qr_code_token)
+    if not qr_code_doc['approved']:
+        return {
+            'approved': False
+        }
+    patient = find_patient(qr_code_doc['patient_token'])
+    return {
+        'approved': qr_code_doc['approved'],
+        'approved_at': qr_code_doc['approved_at'],
+        'doctor_name': doctor['first_name'] + ' ' + doctor['last_name'],
+        'patient_name': patient['first_name'] + ' ' + patient['last_name'],
+    }
 @app.get('/qr_codes/approve')
 def qr_codes_approve(patient_token: str, qr_code_token: str):
+    # TODO Verify patient token
     patient = find_patient(patient_token)
     qr_code_doc =  find_qr_code_by_qr_code_token(qr_code_token)
     doctor = find_doctor(qr_code_doc['doctor_token'])
     qr_code_doc['patient_id'] = patient['id']
     qr_code_doc['patient_token'] = patient_token
     qr_code_doc['approved_at'] = get_timestamp_str()
+    qr_code_doc['approved'] = True
     update_qr_code_doc(qr_code_doc)
     return {
         'approved': True,
@@ -68,6 +87,7 @@ def qr_codes_approve(patient_token: str, qr_code_token: str):
 
 @app.get('/qr_codes/verify')
 def qr_codes_verify(patient_token: str, qr_code_token: str):
+    # TODO Verify patient token
     qr_code_doc =  find_qr_code_by_qr_code_token(qr_code_token)
     doctor_id = qr_code_doc['doctor_id']
     doctor_token = qr_code_doc['doctor_token']
@@ -78,6 +98,15 @@ def qr_codes_verify(patient_token: str, qr_code_token: str):
       'qr_code_token': qr_code_token
     }
 
+# Get a QR code that will show on the doctor's screen
+@app.get("/qr_codes/:qr_code_token")
+def qr_codes_create(qr_code_token: str):
+    import pdb;pdb.set_trace()
+    qr_code_doc =  find_qr_code_by_qr_code_token(qr_code_token)
+    doctor_id = qr_code_doc['doctor_id']
+    qr_code_content = make_qr_code(doctor_id, qr_code_token)
+    return StreamingResponse(make_qr_code_image(qr_code_content), media_type="image/png")
+
 # Create a QR code that will show on the doctor's screen
 @app.get("/qr_codes/create")
 def qr_codes_create(doctor_token: str):
@@ -85,6 +114,7 @@ def qr_codes_create(doctor_token: str):
     doctor_id = doctor['id']
     qr_code_token = str(uuid.uuid1())
     qr_code_content = make_qr_code(doctor_id, qr_code_token)
+    created_at = get_timestamp_str()
     qr_code_doc = {
         'id': qr_code_token,
         'doctor_id': doctor_id,
@@ -92,9 +122,15 @@ def qr_codes_create(doctor_token: str):
         'doctor_token': doctor_token,
         'patient_token': '',
         'qr_code_token': qr_code_token,
-        'expired_at': 1234
+        'approved': False,
+        'approved_at': None,
+        'expired_at': 1234,
+        'created_at': created_at
     }
     create_qr_code_doc(qr_code_doc)
-    return StreamingResponse(make_qr_code_image(qr_code_content), media_type="image/png")
+    return {
+        'qr_code_token': qr_code_token,
+        'created_at': created_at
+    }
 
 init_db()

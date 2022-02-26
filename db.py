@@ -45,7 +45,7 @@ def init_db():
     }
     mydb.patients.drop()
     mydb.doctors.drop()
-    mydb.qr_codes.drop()
+    # mydb.qr_codes.drop()
 
     requests = [ReplaceOne({'id': patient_id}, patient, upsert=True)]
     mydb.patients.bulk_write(requests)
