@@ -8,9 +8,19 @@ from fastapi import FastAPI
 from fastapi.responses import StreamingResponse, Response
 
 from db import mydb, init_db
-
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+origins = [ "*" ]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def get_timestamp_str():
     return datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
